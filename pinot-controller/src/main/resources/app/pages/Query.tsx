@@ -171,6 +171,8 @@ const QueryPage = () => {
 
   const [queryTimeout, setQueryTimeout] = useState('');
 
+  const [queryOptions, setQueryOptions] = useState('');
+
   const [outputResult, setOutputResult] = useState('');
 
   const [resultError, setResultError] = useState('');
@@ -257,19 +259,30 @@ const QueryPage = () => {
     let url;
     let params;
     let timeoutStr = '';
+    let queryOptionsObject = {};
+    let queryOptionsStr = '';
     if(queryTimeout !== ''){
       timeoutStr = ` option(timeoutMs=${parseInt(queryTimeout, 10)})`
+    }
+    if(queryOptions !== ''){
+      queryOptionsObject = JSON.parse(queryOptions);
+      Object.entries(queryOptionsObject).forEach(entry => {
+        if (entry[0] == 'timeoutMs') {
+          return;
+        }
+        queryOptionsStr += `option(${entry[0]}=${entry[1]})`
+      })
     }
     if (checked.querySyntaxPQL) {
       url = 'pql';
       params = JSON.stringify({
-        pql: `${query || inputQuery.trim()}${timeoutStr}`,
+        pql: `${query || inputQuery.trim()}${timeoutStr}${queryOptionsStr}`,
         trace: checked.tracing,
       });
     } else {
       url = 'sql';
       params = JSON.stringify({
-        sql: `${query || inputQuery.trim()}${timeoutStr}`,
+        sql: `${query || inputQuery.trim()}${timeoutStr}${queryOptionsStr}`,
         trace: checked.tracing,
       });
     }
@@ -456,6 +469,13 @@ const QueryPage = () => {
                 <FormControl fullWidth={true} className={classes.timeoutControl}>
                   <InputLabel htmlFor="my-input">Timeout (in Milliseconds)</InputLabel>
                   <Input id="my-input" type="number" value={queryTimeout} onChange={(e)=> setQueryTimeout(e.target.value)}/>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={4}>
+                <FormControl fullWidth={true} className={classes.timeoutControl}>
+                  <InputLabel htmlFor="my-input">queryOptions</InputLabel>
+                  <Input id="my-input" type="text" value={queryOptions} onChange={(e)=> setQueryOptions(e.target.value)}/>
                 </FormControl>
               </Grid>
 
